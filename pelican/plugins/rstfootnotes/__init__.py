@@ -1,0 +1,1 @@
+from .rstfootnotes import *  # NOQA
