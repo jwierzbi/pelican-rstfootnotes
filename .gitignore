@@ -1,3 +1,9 @@
+# IDE
+
+.vscode/
+
+# Projects files
+
 poetry.lock
 dist/
 
