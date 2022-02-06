@@ -9,6 +9,7 @@ tables may differ)."""
 
 from itertools import chain
 import re
+from typing import List
 from xml.dom.minidom import Document, Element
 
 import html5lib
@@ -20,6 +21,11 @@ from .settings import RST_FOOTNOTES_TYPE
 
 
 def _init(pelican):
+    """Handles Pelican's "initialize" signal.
+
+    Args:
+        pelican: Pelican instance.
+    """
     DEFAULT_CONFIG.setdefault("RST_FOOTNOTES_TYPE", RST_FOOTNOTES_TYPE)
     if pelican is not None:
         pelican.settings.setdefault("RST_FOOTNOTES_TYPE", RST_FOOTNOTES_TYPE)
@@ -42,7 +48,7 @@ def _prev_non_text_node(node: Element) -> Element:
     return prev
 
 
-def _build_footnotes_list(document: Document) -> list[list[Element]]:
+def _build_footnotes_list(document: Document) -> List[List[Element]]:
     """Build lists of tables for the footnotes.
 
     Footnotes are grouped in the document as a series of tables. Each series can be
@@ -85,7 +91,7 @@ def _build_footnotes_list(document: Document) -> list[list[Element]]:
     return series
 
 
-def _generate_definition_list(document: Document, footnotes: list[Element]) -> Element:
+def _generate_definition_list(document: Document, footnotes: List[Element]) -> Element:
     """Create new definition list node from footnotes tables.
 
     The function goes through the list of footnotes tables and copies the data to a
@@ -93,7 +99,7 @@ def _generate_definition_list(document: Document, footnotes: list[Element]) -> E
 
     Args:
         document (Document): Input document.
-        footnotes (list[Element]): List of footnotes tables.
+        footnotes (list): List of footnotes tables.
 
     Returns:
         Element: Definition list node.
@@ -125,7 +131,7 @@ def _generate_definition_list(document: Document, footnotes: list[Element]) -> E
     return footnotes_node
 
 
-def _generate_bullet_list(document: Document, footnotes: list[Element]) -> Element:
+def _generate_bullet_list(document: Document, footnotes: List[Element]) -> Element:
     """Create new bullet list node from footnotes tables.
 
     The function goes through the list of footnotes tables and copies the data to a
@@ -133,7 +139,7 @@ def _generate_bullet_list(document: Document, footnotes: list[Element]) -> Eleme
 
     Args:
         document (Document): Input document.
-        footnotes (list[Element]): List of footnotes tables.
+        footnotes (list): List of footnotes tables.
 
     Returns:
         Element: Bullet list node.
@@ -168,7 +174,7 @@ def _generate_bullet_list(document: Document, footnotes: list[Element]) -> Eleme
 
 
 def _replace_footnotes(
-    content: str, old_nodes: list[list[Element]], new_nodes: list[Element]
+    content: str, old_nodes: List[List[Element]], new_nodes: List[Element]
 ) -> str:
     """Replace footnotes tables (`old_nodes`) with newly crated representation of the
     footnotes (`new_nodes`).
@@ -250,6 +256,11 @@ def _process_footnotes(content: str, format: str) -> str:
 
 
 def _process_articles_footnotes(article_generator):
+    """Handles Pelican's "article_generator_finalized" signal.
+
+    Args:
+        article_generator: Article generator.
+    """
     for article in chain(article_generator.articles, article_generator.drafts):
         article._content = _process_footnotes(
             article._content, article_generator.settings["RST_FOOTNOTES_TYPE"]
@@ -257,6 +268,11 @@ def _process_articles_footnotes(article_generator):
 
 
 def _process_pages_footnotes(page_generator):
+    """Handles Pelican's "page_generator_finalized" signal.
+
+    Args:
+        page_generator: Page generator.
+    """
     for page in page_generator.pages:
         page._content = _process_footnotes(
             page._content, page_generator.settings["RST_FOOTNOTES_TYPE"]
